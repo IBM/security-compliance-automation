@@ -23,33 +23,33 @@ class CreateTrustedProfileAndCrossAccount(object):
         except Exception as e:
            err = f'Error while creating instances for iam identity and policy services - {e}'
            self.colored_print(err,Colors.RED)
-    
+
     def colored_input(self,prompt, color_code):
         return input(f'\033[{color_code}m{prompt}\033[0m')
 
     def colored_print(self,text, color_code):
         print(f'\033[{color_code}m{text}\033[0m')
 
-    def is_valid_instance(self,isntanceId):
+    def is_valid_instance(self,instanceId):
         try:
-            uuid_instance = uuid.UUID(isntanceId, version=4)
-            return str(uuid_instance) == isntanceId  
+            uuid_instance = uuid.UUID(instanceId, version=4)
+            return str(uuid_instance) == instanceId
         except ValueError:
             return False
-    
+
     def create_trusted_profile(self, tpBody):
         #tpProfile = None
         try:
             tpProfile = self.service_client.create_profile(name=tpBody.get("name"),description=tpBody.get("description"),account_id=tpBody.get("account_id")).get_result()
-            self.colored_print(f"Trusted profile creation is successful - {tpProfile['id']}",Colors.GREEN)
+            self.colored_print(f"Trusted profile creation was successful - {tpProfile['id']}",Colors.GREEN)
         except Exception as e:
-            err = f"An error occurred while creating trust profile: {e}"
+            err = f"An error occurred while creating the trusted profile: {e}"
             self.colored_print(err,Colors.RED)
-        
+
         try:
             crn = tpBody.get("crn")
             if crn != '':
-                self.colored_print(f'Start setting crn - {crn} to the trust profile, Please wait it will take some time ...',Colors.YELLOW)
+                self.colored_print(f'Start setting crn - {crn} to the trusted profile, Please wait it will take some time ...',Colors.YELLOW)
                 self.service_client.set_profile_identity(profile_id=tpProfile['id'],identity_type="crn",identifier=crn,type="crn",description=tpBody.get("crn_description"))
                 self.colored_print("Successfully set the crn to the creating trusted profile.",Colors.GREEN)
 
@@ -58,7 +58,7 @@ class CreateTrustedProfileAndCrossAccount(object):
                 attribute=iam_policy_management_v1.SubjectAttribute(name='iam_id', value='iam-'+tpProfile['id']).to_dict()
                 policy_subjects = iam_policy_management_v1.PolicySubject(attributes=[attribute])
                 account_id_resource_attribute = iam_policy_management_v1.ResourceAttribute(name='accountId', value=tpBody.get("account_id"))
-                
+
                 iam_viewer_role = iam_policy_management_v1.PolicyRole(role_id='crn:v1:bluemix:public:iam::::role:Viewer')
                 iam_configreader_role = iam_policy_management_v1.PolicyRole(role_id='crn:v1:bluemix:public:iam::::role:ConfigReader')
                 iam_service_role_reader = iam_policy_management_v1.PolicyRole(role_id='crn:v1:bluemix:public:iam::::serviceRole:Reader')
@@ -95,20 +95,20 @@ class CreateTrustedProfileAndCrossAccount(object):
                 self.colored_print("Successfully assigned the required access policies for the trusted profile.",Colors.GREEN)
                 self.colored_print(f"Your trusted profile - {tpProfile['id']} is ready to utilize.",Colors.GREEN)
             except Exception as e:
-                err = f"An error occurred while creating trust profile: {e}"
+                err = f"An error occurred while creating trusted profile: {e}"
                 self.colored_print(err,Colors.RED)
                 self.service_client.delete_profile(profile_id=tpProfile['id'])
-                self.colored_print(f"Created trusted profile - {tpProfile['id']} is deleted due unsucessful operations.",Colors.GREEN)
-        except Exception as e:    
-            err = f"An error occurred while creating trust profile: {e}"
+                self.colored_print(f"Created trusted profile - {tpProfile['id']} was deleted due to unsucessful operations.",Colors.GREEN)
+        except Exception as e:
+            err = f"An error occurred while creating trusted profile: {e}"
             self.colored_print(err,Colors.RED)
             self.service_client.delete_profile(profile_id=tpProfile['id'])
-            self.colored_print(f"Created trusted profile - {tpProfile['id']} is deleted due unsucessful operations.",Colors.GREEN)
+            self.colored_print(f"Created trusted profile - {tpProfile['id']} was deleted due to unsucessful operations.",Colors.GREEN)
 
     def register_cross_account(self, api_endpoint_url, target_req_body,token):
         access_token = token['access_token']
         headers = {
-            'Authorization': f'Bearer {access_token}',  
+            'Authorization': f'Bearer {access_token}',
             'Content-Type': 'application/json',
         }
 
@@ -124,7 +124,7 @@ class CreateTrustedProfileAndCrossAccount(object):
             self.colored_print(f"Error: {e}", Colors.RED)
 
     def register_cross_accounts(self,csv_file_path,token):
-        expected_columns = ['name', 'account_id', 'trusted_profile_id','region','instance_id']  
+        expected_columns = ['name', 'account_id', 'trusted_profile_id','region','instance_id']
 
         with open(csv_file_path, 'r') as csvfile:
             csv_reader = csv.DictReader(csvfile)
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     ct.colored_print("1. Create Trusted Profile", Colors.MAGENTA)
     ct.colored_print("2. Register Cross Account", Colors.MAGENTA)
     ct.colored_print("3. Register Multiple Cross Accounts From CSV", Colors.MAGENTA)
-    
+
     actionType = ct.colored_input("\nEnter the number of your choice: ", Colors.MAGENTA)
     print('\n')
     if actionType == "1":
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         ct.create_trusted_profile(tpBody)
     elif actionType == "2":
         api_endpoint_url=os.getenv('TARGETS_ENDPOINT')
-        ct.colored_print("Please provide the details which are required to create the target account ...", Colors.CYAN)
+        ct.colored_print("Please provide the required details to create the target account ...", Colors.CYAN)
         print('\n')
         ct.colored_print("\nChoose region to register target account: \n",Colors.CYAN)
         if '.test.' in api_endpoint_url:
@@ -185,19 +185,19 @@ if __name__ == "__main__":
             ct.colored_print(txt, Colors.MAGENTA)
         regionChoice = int(ct.colored_input("\nEnter the number of your choice: ", Colors.MAGENTA))
         while(len(regions) < regionChoice):
-            regionChoice = int(ct.colored_input("\nEntered choice is invalid, Please provide a valid number for your choice: ",Colors.RED))
+            regionChoice = int(ct.colored_input("\nEntered choice is invalid, please provide a valid number for your choice: ",Colors.RED))
         region = regions[regionChoice-1].split('_')[0]
 
         instance_id = ct.colored_input("\nEnter the security and compliance instance ID to register your cross account: ", Colors.MAGENTA)
         while(ct.is_valid_instance(instance_id)==False):
-            instance_id = ct.colored_input("\nEntered security and compliance instance ID is not valid, please provide the valid security and compliance instance ID: ", Colors.RED)
-        
+            instance_id = ct.colored_input("\nEntered security and compliance instance ID is invalid, please provide the valid security and compliance instance ID: ", Colors.RED)
+
         api_endpoint_url=api_endpoint_url.replace('region',region).replace('instance_id',instance_id)
-        
+
         name = ct.colored_input("\nEnter the name to register cross account: ", Colors.MAGENTA)
         account_id = ct.colored_input("\nEnter the account id to register cross account: ", Colors.MAGENTA)
         trusted_profile_id = ct.colored_input("\nEnter the trusted profile id to access account's resources: ", Colors.MAGENTA)
-        
+
         target_req_body ={"account_id":account_id,"trusted_profile_id":trusted_profile_id,"name":name}
         token = ct.token_manager.request_token()
         ct.colored_print("Registering cross account, please wait for some time...", Colors.YELLOW)
