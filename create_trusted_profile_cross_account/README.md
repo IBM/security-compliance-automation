@@ -1,6 +1,6 @@
 # What is this script for?
 
-It is used to create a Trusted Profile, that the user can register as a target in an SCC instance, to utilize SCC cross account scan capabilities.
+This script is used to create a Trusted Profile, that you can register as a target in a Security and Compliance Center instance, to utilize the cross account scan capabilities.
 
 ## Steps to run
 
