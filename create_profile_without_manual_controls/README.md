@@ -3,8 +3,8 @@
 This script automates the creation of custom control libraries and profiles based on predefined entities. The script performs the following tasks:
 1. Retrieves predefined entities.
 2. Removes manual controls.
-3. Creates custom control libraries.
-4. Creates custom profiles.
+3. Creates custom control library.
+4. Creates custom profile.
 
 ## Dependencies
 Ensure `parameter.json` exists with the required parameters.
