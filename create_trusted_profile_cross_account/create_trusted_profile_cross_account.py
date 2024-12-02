@@ -64,6 +64,7 @@ class CreateTrustedProfileAndCrossAccount(object):
                 iam_configreader_role = iam_policy_management_v1.PolicyRole(role_id='crn:v1:bluemix:public:iam::::role:ConfigReader')
                 iam_service_role_reader = iam_policy_management_v1.PolicyRole(role_id='crn:v1:bluemix:public:iam::::serviceRole:Reader')
                 iam_admin_role = iam_policy_management_v1.PolicyRole(role_id='crn:v1:bluemix:public:iam::::role:Administrator')
+                secrets_manager_role = iam_policy_management_v1.PolicyRole(role_id='crn:v1:bluemix:public:secrets-manager::::serviceRole:SecretsReader')
                 policy_roles = [
                                 iam_service_role_reader,
                                 iam_viewer_role,
@@ -88,6 +89,13 @@ class CreateTrustedProfileAndCrossAccount(object):
 
                 policy_roles = [iam_viewer_role,iam_configreader_role]
                 service_name_resource_attribute = iam_policy_management_v1.ResourceAttribute(name='serviceType', value='platform_service')
+                policy_resources = iam_policy_management_v1.PolicyResource(attributes=[account_id_resource_attribute, service_name_resource_attribute])
+                self.policy_service_client.create_policy(
+                type='access', subjects=[policy_subjects], roles=policy_roles, resources=[policy_resources]
+                ).get_result()
+                
+                policy_roles = [secrets_manager_role]
+                service_name_resource_attribute = iam_policy_management_v1.ResourceAttribute(name='serviceName', value='secrets-manager')
                 policy_resources = iam_policy_management_v1.PolicyResource(attributes=[account_id_resource_attribute, service_name_resource_attribute])
                 self.policy_service_client.create_policy(
                 type='access', subjects=[policy_subjects], roles=policy_roles, resources=[policy_resources]
